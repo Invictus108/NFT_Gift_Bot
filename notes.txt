@@ -1,6 +1,6 @@
 Scheduler:
 Basically just a SQL database and can query every few minutes
-User_id, wallet, funds, price_cap, time, preferences _vector
+User_id, Time, wallet, funds, price_cap, time-interval, preferences _vector
 Pings to check database come from hosting service 
 
 Agent:
@@ -17,6 +17,7 @@ Social media scraping
 Rarity analysis
 Collect data to train a model
 Integrate expected growth into final scoring function 
+
 
 Marketplaces:
 Aggregator APIs
