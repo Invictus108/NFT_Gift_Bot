@@ -1,0 +1,46 @@
+Scheduler:
+Basically just a SQL database and can query every few minutes
+User_id, wallet, funds, price_cap, time, preferences _vector
+Pings to check database come from hosting service 
+
+Agent:
+Vector embeddings
+Can do similarity clustering across users for recs
+Keep track of what user gets rid of and what they buy
+Recommender algorithms across multiple users (collections or artists)
+Accumulate database and use it to train NN?
+Hybrid scoring function 
+
+Price prediction:
+Track trend of artist or collection 
+Social media scraping
+Rarity analysis
+Collect data to train a model
+Integrate expected growth into final scoring function 
+
+Marketplaces:
+Aggregator APIs
+
+
+
+Submitting::
+Front end submits form with the data
+Verify payments has been received (wallet integration)
+Backend formats and inserts into database alongside embedding vector
+
+Buyings:
+Receive pings from service
+Format postgres query to check of i need to buy something
+If so, get listings from NFT api (preferably with price filtering to narrow options)
+Apply agents
+Vector embeddings
+Price prediction
+Hybrid scoring function 
+Buy selected NFT and send to person wallet
+Send them a fun email or something 
+
+Advanced:
+Security 
+Accounts
+NFT gallery
+
