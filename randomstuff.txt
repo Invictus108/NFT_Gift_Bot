@@ -1,0 +1,34 @@
+﻿https://dilipkumar.medium.com/python-refresher-e17b159c7e59
+
+
+https://opensea.io/
+
+
+https://docs.opensea.io/reference/list_nfts_by_collection
+
+
+AI Agent Choosing
+
+
+Preference
+* Categories
+   * Just Art (Image ownership tokens)
+      * Profile Pics
+      * Photos
+   * Games (involved currency in some game -> requires more investment and time)
+      * Some cannot be exchanged for monetary value
+   * Mystery Boxes??? -> Pudgy Rods started out as eggs and hatched into fishing rod NFTs?
+   * Membership -> Holders get some form of value
+   * Music -> A song
+   * Domain Names
+* Content?
+   * Animals vs Humans
+   * Portrait
+   * Landscape
+   * Style?
+      * Anime
+      * 3D
+   * Also NSFW
+
+
+Investment
