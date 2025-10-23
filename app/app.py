@@ -1,16 +1,20 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import datetime, timezone, timedelta
 from sentence_transformers import SentenceTransformer
+from dotenv import load_dotenv
 
 # setup app
 app = Flask(__name__)
 CORS(app)
 
+# load environment variables
+load_dotenv()
+
 # dataase stuff
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("database_url") # port: 5432
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL") # port: 5432
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # create database
@@ -38,6 +42,7 @@ def index():
     data = request.json
 
     # TODO: unpack data and make sure its a json with the following fields
+    # json should be of form {wallet, funds, price_cap, time_interval, preferences_vector}
 
     # define model
     model = SentenceTransformer('intfloat/e5-small-v2')
@@ -54,7 +59,7 @@ def index():
     db.session.add(new_order)
     db.session.commit()
 
-    return data
+    return jsonify({"message": "success"}), 200
 
 # this is the function to check if there are any valid orders when pinged
 @app.route('/api/check_orders', methods=['GET'])
@@ -63,9 +68,9 @@ def check_orders():
     now = datetime.now(timezone.utc)
 
     # find all orders that need to be fulfilled 
-    past_entries = Orders.query.filter(Orders.time < now).all()
+    orders = Orders.query.filter(Orders.time < now).all()
 
-    for i in past_entries:
+    for i in orders:
         db.session.delete(i)
         buy(i)
 
@@ -77,7 +82,7 @@ def check_orders():
             db.session.commit()
 
 
-    return "done"
+    return jsonify({"message": f"ordered {len(orders)}"}), 200
 
 def buy(order):
     # get amounts to spend
@@ -96,3 +101,7 @@ def buy(order):
     # TODO: send them a email or something
         
     pass
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
