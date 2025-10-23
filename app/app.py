@@ -30,6 +30,9 @@ class Orders(db.Model):
     time_interval = db.Column(db.Integer)  # gotta figure out what unit
     preferences_vector = db.Column(db.ARRAY(db.Float))  # array of floats
 
+    def __repr__(self):
+        return f"Order({self.order_id}, {self.time}, {self.wallet}, {self.funds}, {self.price_cap}, {self.time_interval}, {self.preferences_vector})"
+
 
 # create table (does nothing if already there)
 with app.app_context():
@@ -53,11 +56,12 @@ def index():
         funds=data["funds"], # funds in what?
         price_cap=data["price_cap"],
         time_interval=data["time_interval"], # days for now
-        preferences_vector=model.encode(data["preferences_vector"])
+        preferences_vector=model.encode(data["preferences_vector"]).astype(float).tolist()
     )
 
-    db.session.add(new_order)
-    db.session.commit()
+    with app.app_context():
+        db.session.add(new_order)
+        db.session.commit()
 
     return jsonify({"message": "success"}), 200
 
@@ -71,15 +75,20 @@ def check_orders():
     orders = Orders.query.filter(Orders.time < now).all()
 
     for i in orders:
-        db.session.delete(i)
+        with app.app_context():
+            db.session.delete(i)
+            db.session.commit()
+        
+        # call buy function
         buy(i)
 
         # add back if there are funds left
         if i.funds > i.price_cap:
             i.funds -= i.price_cap
             i.time = now + timedelta(days=i.time_interval) # new time for next buy
-            db.session.add(i)
-            db.session.commit()
+            with app.app_context():
+                db.session.add(i)
+                db.session.commit()
 
 
     return jsonify({"message": f"ordered {len(orders)}"}), 200
@@ -100,7 +109,7 @@ def buy(order):
 
     # TODO: send them a email or something
         
-    pass
+
 
 
 if __name__ == '__main__':
