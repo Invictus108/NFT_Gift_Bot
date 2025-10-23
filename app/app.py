@@ -2,14 +2,15 @@ from flask import Flask, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import os
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+from sentence_transformers import SentenceTransformer
 
 # setup app
 app = Flask(__name__)
 CORS(app)
 
 # dataase stuff
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("database_url")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("database_url") # port: 5432
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # create database
@@ -17,9 +18,7 @@ db = SQLAlchemy(app)
 
 class Orders(db.Model):
     __tablename__ = "orders"
-
     order_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer) 
     time = db.Column(db.DateTime, nullable=False)
     wallet = db.Column(db.String(120), nullable=False)
     funds = db.Column(db.Float, nullable=False)
@@ -27,8 +26,6 @@ class Orders(db.Model):
     time_interval = db.Column(db.Integer)  # gotta figure out what unit
     preferences_vector = db.Column(db.ARRAY(db.Float))  # array of floats
 
-    def __repr__(self):
-        return f"<UserSettings user_id={self.user_id} wallet={self.wallet}>"
 
 # create table (does nothing if already there)
 with app.app_context():
@@ -40,19 +37,18 @@ with app.app_context():
 def index():
     data = request.json
 
-    # TODO: unpack data
-    # TODO: create embedding vector
-    # TODO: add data to database
+    # TODO: unpack data and make sure its a json with the following fields
 
-    # TODO: these are just placeholder values for now
+    # define model
+    model = SentenceTransformer('intfloat/e5-small-v2')
+
     new_order = Orders(
-        user_id=0,
-        time=datetime.utcnow(), # add interval to this
-        wallet="0xABC123",
-        funds=1000.0,
-        price_cap=250.0,
-        time_interval=30,
-        preferences_vector=[0.2, 0.5, 0.3]
+        time=datetime.now(timezone.utc) + timedelta(days=data["time_interval"]), # add interval to this
+        wallet=data["wallet"],
+        funds=data["funds"], # funds in what?
+        price_cap=data["price_cap"],
+        time_interval=data["time_interval"], # days for now
+        preferences_vector=model.encode(data["preferences_vector"])
     )
 
     db.session.add(new_order)
@@ -64,17 +60,39 @@ def index():
 @app.route('/api/check_orders', methods=['GET'])
 def check_orders():
     # get time
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     # find all orders that need to be fulfilled 
     past_entries = Orders.query.filter(Orders.time < now).all()
 
     for i in past_entries:
+        db.session.delete(i)
         buy(i)
-        # TODO: insert back into datbase if they have funds left
+
+        # add back if there are funds left
+        if i.funds > i.price_cap:
+            i.funds -= i.price_cap
+            i.time = now + timedelta(days=i.time_interval) # new time for next buy
+            db.session.add(i)
+            db.session.commit()
+
 
     return "done"
 
 def buy(order):
-    # TODO: buy order
+    # get amounts to spend
+    if order.funds < order.price_cap:
+        funds = order.funds
+    else:
+        funds = order.price_cap
+    
+
+    # TODO: get options and data from APIS
+
+    # TODO: AI stuff to decide on thing
+
+    # TODO: submit order
+
+    # TODO: send them a email or something
+        
     pass
