@@ -3,7 +3,7 @@ import requests
 url = "https://api.opensea.io/api/v2/collections?"
 headers = {
     "accept": "application/json",
-    "x-api-key": "API-KEY"
+    "x-api-key": "bb7a25e2f18e46cabc97a8090de9b1da"
 }
 
 # first 100 collections, unsorted
