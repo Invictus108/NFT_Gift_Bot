@@ -1,0 +1,21 @@
+Testing for database
+@app.route('/api/test', methods=['GET'])
+def test():
+    test = "trtrtr"
+    new_order = Orders(
+        time=datetime.now(timezone.utc), # add interval to this
+        wallet="this is a nomic",
+        funds=0.1, # funds in what?
+        price_cap=45,
+        time_interval=4, # days for now
+        preferences_vector=embed_text_chunk_local(test).astype(float).tolist()
+    )
+
+    db.session.add(new_order)
+    db.session.commit()
+    orders = Orders.query.all()
+
+    for i in orders:
+        print(i)
+
+    return jsonify({"message": f"Deleted {len(orders)} orders"}), 200
