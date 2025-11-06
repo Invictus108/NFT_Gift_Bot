@@ -50,8 +50,7 @@ seven_day_volume
 
 # TODO: figure out why this dosent work. 
 # TODO: price filtering here? Would make things easier
-# basically openseas freaks out when order_by is "created_date" (which is the default value) and its filtering chains)
-def getcollections(num=100, order_by="market_cap", chain="ethereum"):
+def getcollections(num=100, order_by="seven_day_volume", chain="ethereum"):
     url = "https://api.opensea.io/api/v2/collections?"
     if chain: url += f"chain={chain}&"
     if order_by: url += f"order_by={order_by}&"
@@ -154,9 +153,9 @@ def agent(description, image_url, is_nsfw):
 
 col_nfts_map = {}
 
-# collections = getcollections() # get collections 
+collections = getcollections() # get collections 
 
-collections = [{"collection": "kai583264"}] # cause collections still dosent work
+# collections = [{"collection": "kai583264"}] # cause collections still dosent work
 
 collection_slugs = getslugsfromcollections(collections) # get collection ids
 for slug in collection_slugs: # for each id
