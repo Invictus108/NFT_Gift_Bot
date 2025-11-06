@@ -23,10 +23,15 @@ ronin, shape, solana, soneium, unichain, zora
 """
 
 # this is kinda useless
-def getlistings(chain):
+def getlistings(chain="ethereum"):
     url = f"https://api.opensea.io//api/v2/orders/{chain}/seaport/listings"
     return requests.get(url, headers=headers).json()['orders'][1]['maker_asset_bundle']
-
+# def getlistingprice(listing):
+#     return listing['current_price']
+#
+# def getlistingprices(chain):
+#     return [getlistingprice(listing) for listing in getlistings(chain)["orders"]]
+#Tried a bit to get it to work -> listing formatting is just too hard to parse through manually
 
 """
 https://docs.opensea.io/reference/list_collections
@@ -45,19 +50,14 @@ seven_day_volume
 
 # TODO: figure out why this dosent work. 
 # TODO: price filtering here? Would make things easier
-def getcollections(num=100, order_by=None, chain="ethereum"):
+# basically openseas freaks out when order_by is "created_date" (which is the default value) and its filtering chains)
+def getcollections(num=100, order_by="market_cap", chain="ethereum"):
     url = "https://api.opensea.io/api/v2/collections?"
     if chain: url += f"chain={chain}&"
     if order_by: url += f"order_by={order_by}&"
     url += f"limit={num}&"
 
     return requests.get(url, headers=headers).json()["collections"]
-
-
-"""
-----getslugsfromcollections---- given a list of collections (which is conveniently returned by getcollections), return their collection_slugs
-"""
-
 
 def getslugsfromcollections(collections):
     return [collection['collection'] for collection in collections]
