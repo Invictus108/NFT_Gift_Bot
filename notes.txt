@@ -20,7 +20,8 @@ Integrate expected growth into final scoring function
 
 
 Marketplaces:
-Aggregator APIs
+make a wallet for the bot and integrate it with openseas and use that to buy and sell
+how to ensure we can be trusted?
 
 
 

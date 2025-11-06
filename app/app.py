@@ -39,7 +39,6 @@ def embed_image_local(image_path: str,
     """
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(device)
 
     # load model & processor
     processor = AutoImageProcessor.from_pretrained(model_name)
