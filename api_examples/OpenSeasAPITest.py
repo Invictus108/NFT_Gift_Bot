@@ -21,10 +21,9 @@ base, bera_chain, blast, ethereum, flow, klaytn, matic, optimism,
 ronin, shape, solana, soneium, unichain, zora 
 
 """
-#
-# def getlistings(chain):
-#     url = f"https://api.opensea.io//api/v2/orders/{chain}/seaport/listings"
-#     return requests.get(url, headers=headers).json()
+def getlistings(chain):
+     url = f"https://api.opensea.io//api/v2/orders/{chain}/seaport/listings"
+     return requests.get(url, headers=headers).json()['orders']
 #
 # def getlistingprice(listing):
 #     return listing['current_price']
@@ -49,5 +48,4 @@ def getbestcollectionprice(collection_slug, num=100):
     url = "https://api.opensea.io/api/v2/listings/collection/collection_slug/best"
 
 
-
-print(getcollections())
+print(getlistings("ethereum")[0])
