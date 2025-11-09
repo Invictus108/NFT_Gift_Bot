@@ -86,7 +86,7 @@ def update_database(data):
                 nft_id = nft["nft_id"],
                 price = nft["price"],
                 currency = nft["currency"],
-                image_embedding_vector = embed_image_local(nft["image_url"]).numpy().astype(float).tolist(),
+                image_embedding_vector = embed_image_local(nft["image_url"]).astype(float).tolist(),
                 text_embedding_vector = embed_text_chunk_local(nft["description"]).numpy().astype(float).tolist()
 
             )
@@ -171,7 +171,7 @@ def index():
         funds=data["funds"], # funds in what?
         price_cap=data["price_cap"],
         time_interval=data["time_interval"], # days for now
-        preferences_vector=embed_text_chunk_local(data["preferences_vector"]).numpy().astype(float).tolist()
+        preferences_vector=embed_text_chunk_local(data["preferences_vector"]).astype(float).tolist()
     )
 
     db.session.add(new_order)
@@ -249,9 +249,9 @@ def buy(order):
             # take average similarity score
             if similarity_image and similarity_text:
                 similarity = (similarity_image + similarity_text) / 2
-            elif similarity_image:
+            elif similarity_image is not None:
                 similarity = similarity_image
-            elif similarity_text:
+            elif similarity_text is not None:
                 similarity = similarity_text
             else:
                 similarity = 0
