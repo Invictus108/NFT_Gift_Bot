@@ -1,6 +1,7 @@
 import os, requests, json
 from dotenv import load_dotenv
 import random
+import time
 
 load_dotenv()
 API_KEY = os.getenv('API_KEY')
@@ -21,6 +22,8 @@ base, bera_chain, blast, ethereum, flow, klaytn, matic, optimism,
 ronin, shape, solana, soneium, unichain, zora 
 
 """
+
+# TODO: listing have maker_asset_bundle field with nft data
 
 # this is kinda useless
 def getlistings(chain="ethereum"):
@@ -69,8 +72,8 @@ https://docs.opensea.io/reference/list_nfts_by_collection
 # find listing and return best price in ETH
 # TODO: look through all listing to check if there is one in ETH
 # right now its just returning the first one even if its not in ETH
-def getbestlisting(nft):
-    url = f"https://api.opensea.io/api/v2/listings/collection/{nft['collection']}/nfts/{nft["identifier"]}/best"
+def getbestlisting(collection_slug, nft):
+    url = f"https://api.opensea.io/api/v2/listings/collection/{collection_slug}/nfts/{nft}/best"
 
     order_json = requests.get(url, headers=headers).json()
 
@@ -92,22 +95,33 @@ def getbestlisting(nft):
 
 
 # get the NFTs from the collection and filter them 
-def getnftsfromcollection(collection_slug, max_price, limit=100):
+def getnftsfromcollection(collection_slug, limit=100):
     url = f"https://api.opensea.io/api/v2/collection/{collection_slug}/nfts"
     url += f"?limit={limit}"
 
-    nfts = requests.get(url, headers=headers).json()['nfts']
+    try:
+        nfts = requests.get(url, headers=headers).json()['nfts']
+    except:
+        return []
 
     # filter out those outside price range (same computation on generating embeddings)
     good_nfts = []
 
     for nft in nfts:
-        currency, value = getbestlisting(nft)
-        if currency == "ETH" and value <= max_price:
-            print(currency, value)
-            good_nfts.append(nft)
+        currency, value = getbestlisting(nft['collection'], nft["identifier"])
+        nft_data = getnftdata(nft)
+
+        # add currency and price fields
+        nft_data["currency"] = currency
+        nft_data["price"] = value
+
+        # add to return list
+        good_nfts.append(nft)
 
     return good_nfts
+
+
+
 
 
 """
@@ -147,6 +161,15 @@ def getnftdata(nft):
 
 # # overall flow
 
+def main():
+    collections = getcollections()
+    collection_slugs = getslugsfromcollections(collections)
+
+    nfts = []
+    for slug in collection_slugs:
+        nfts += getnftsfromcollection(slug)
+
+
 # random for now just for sims
 def agent(description, image_url, is_nsfw):
     return random.randint(1, 10)
@@ -155,26 +178,42 @@ col_nfts_map = {}
 
 collections = getcollections() # get collections 
 
+print("Got collections")
+
 # collections = [{"collection": "kai583264"}] # cause collections still dosent work
 
 collection_slugs = getslugsfromcollections(collections) # get collection ids
-for slug in collection_slugs: # for each id
-    col_nfts_map[slug] = getnftsfromcollection(slug, 3)
 
+print("got slugs")
+
+for slug in collection_slugs: # for each id
+    print(f"getting nfts from {slug}")
+    time.sleep(0.5)
+    col_nfts_map[slug] = getnftsfromcollection(slug, 10000000)
+
+print("got nfts from collections")
+
+print("total nfts", sum([len(col_nfts_map[slug]) for slug in col_nfts_map.keys()]))
 
 # find cllection with highest score
 max_score = [None, float("-inf")] # [slug, score]
 
 for slug, nfts in col_nfts_map.items():
+    print(f"scoring {slug}")
+    time.sleep(0.5)
     nftdata = getnftdata(nfts[0]) # first nft to try and narrow the search (this is assuming collection will be similar)
     score = agent(nftdata["description"], nftdata["image_url"], nftdata["is_nsfw"]) # use agent to score it
     if score > max_score[1]: # update highest scoring
         max_score = [slug, score]
 
+print("got best collection")
+
 # find NFT with highest score
 max_score_nft = [None, float("-inf")]
 
 for nft in col_nfts_map[max_score[0]]:
+    print(f"scoring {nft}")
+    time.sleep(0.5)
     nftdata = getnftdata(nft)
 
     # print it formated
