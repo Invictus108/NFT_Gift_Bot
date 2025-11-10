@@ -204,8 +204,9 @@ def check_orders():
     for i in orders:
         db.session.delete(i)
         
+        nfts = db.session.query(NFTS).count()
         # call buy function
-        buy(i)
+        buy(i, nfts+1)
 
         # add back if there are funds left
         if i.funds > i.price_cap:
@@ -217,10 +218,10 @@ def check_orders():
 
     return jsonify({"message": f"ordered {len(orders)}"}), 200
 
-def buy(order, recursion_level=0):
+def buy(order, max_depth, recursion_level=0):
     recursion_level += 1
 
-    if recursion_level > 10:
+    if recursion_level > max_depth:
         return "Store Empty"
     
     global cache_lock
@@ -282,7 +283,7 @@ def buy(order, recursion_level=0):
     # if there is no nft to buy, get more options
     if best_nft is None:
         collect_nft_data()  # get nfts syncronously
-        return buy(order, recursion_level=recursion_level)
+        return buy(order, max_depth, recursion_level=recursion_level)
 
     # delete nft
     db.session.delete(best_nft)
@@ -291,7 +292,7 @@ def buy(order, recursion_level=0):
     # vefify that there is a nft to buy and there are enough funds
     currency, value = getbestlisting(best_nft.collection_id, best_nft.nft_id)
     if (currency == "Error" or value == 0) or value > funds:
-        return buy(order, recursion_level=recursion_level) # if not recursivly call buy function again
+        return buy(order, max_depth, recursion_level=recursion_level) # if not recursivly call buy function again
         
 
     # TODO: submit order
