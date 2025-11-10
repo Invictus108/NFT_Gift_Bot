@@ -44,7 +44,7 @@ def getbestlisting(collection_slug, nft):
         return "Error", 0
 
 # get the NFTs from the collection and add price and currecy
-def getnftsfromcollection(collection_slug, limit=100):
+def getnftsfromcollection(collection_slug, limit=50):
     url = f"https://api.opensea.io/api/v2/collection/{collection_slug}/nfts"
     url += f"?limit={limit}"
 

@@ -95,7 +95,7 @@ def getbestlisting(collection_slug, nft):
 
 
 # get the NFTs from the collection and filter them 
-def getnftsfromcollection(collection_slug, limit=100):
+def getnftsfromcollection(collection_slug, limit=10):
     url = f"https://api.opensea.io/api/v2/collection/{collection_slug}/nfts"
     url += f"?limit={limit}"
 
@@ -189,7 +189,7 @@ print("got slugs")
 for slug in collection_slugs: # for each id
     print(f"getting nfts from {slug}")
     time.sleep(0.5)
-    col_nfts_map[slug] = getnftsfromcollection(slug, 10000000)
+    col_nfts_map[slug] = getnftsfromcollection(slug)
 
 print("got nfts from collections")
 
@@ -201,6 +201,8 @@ max_score = [None, float("-inf")] # [slug, score]
 for slug, nfts in col_nfts_map.items():
     print(f"scoring {slug}")
     time.sleep(0.5)
+    if len(nfts) == 0:
+        continue
     nftdata = getnftdata(nfts[0]) # first nft to try and narrow the search (this is assuming collection will be similar)
     score = agent(nftdata["description"], nftdata["image_url"], nftdata["is_nsfw"]) # use agent to score it
     if score > max_score[1]: # update highest scoring

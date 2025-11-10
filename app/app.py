@@ -11,6 +11,8 @@ import torch.nn.functional as F
 from transformers import AutoImageProcessor, AutoModel
 from PIL import Image
 import threading
+import requests
+from io import BytesIO
 from openseas_api import getnftsfromcollection, getcollections, getslugsfromcollections, getbestlisting
 
 # load model for image embeddings
@@ -37,7 +39,18 @@ def embed_text_chunk_local(text: str,
     return embeddings[0]
 
 def embed_image_local(image_path: str) -> torch.Tensor:
-    image = Image.open(image_path).convert("RGB")
+    # load image
+    if image_path.startswith("http"):
+        try:
+            response = requests.get(image_path, timeout=10)
+            response.raise_for_status()
+            image = Image.open(BytesIO(response.content)).convert("RGB")
+        except Exception as e:
+            print(f"Failed to load image {image_path}: {e}")
+            return torch.zeros(768)  # fallback vector, same dim as model
+    else:
+        image = Image.open(image_path).convert("RGB")
+
     inputs = vision_processor(images=image, return_tensors="pt")
     with torch.no_grad():
         output = vision_model(**inputs)
@@ -86,8 +99,8 @@ def update_database(data):
                 nft_id = nft["nft_id"],
                 price = nft["price"],
                 currency = nft["currency"],
-                image_embedding_vector = embed_image_local(nft["image_url"]).astype(float).tolist(),
-                text_embedding_vector = embed_text_chunk_local(nft["description"]).numpy().astype(float).tolist()
+                image_embedding_vector = None if nft["image_url"] == "" else embed_image_local(nft["image_url"]).numpy().astype(float).tolist(),
+                text_embedding_vector = None if nft["description"] == "" else embed_text_chunk_local(nft["description"]).astype(float).tolist()
 
             )
             db.session.add(new_nft)
@@ -148,7 +161,7 @@ class NFTS(db.Model):
     text_embedding_vector = db.Column(db.ARRAY(db.Float))
 
     def __repr__(self):
-        return f"Order({self.id}, {self.collection_id}, {self.nft_id}, {len(self.image_embedding_vector)}, {len(self.text_embedding_vector)})"
+        return f"NFT({self.id}, {self.collection_id}, {self.nft_id}, {len(self.image_embedding_vector)}, {len(self.text_embedding_vector)})"
 
 
 # create table (does nothing if already there)
@@ -204,7 +217,12 @@ def check_orders():
 
     return jsonify({"message": f"ordered {len(orders)}"}), 200
 
-def buy(order):
+def buy(order, recursion_level=0):
+    recursion_level += 1
+
+    if recursion_level > 10:
+        return "Store Empty"
+    
     global cache_lock
 
     # get amounts to spend
@@ -247,7 +265,7 @@ def buy(order):
                 similarity_text = None
 
             # take average similarity score
-            if similarity_image and similarity_text:
+            if similarity_image is not None and similarity_text is not None:
                 similarity = (similarity_image + similarity_text) / 2
             elif similarity_image is not None:
                 similarity = similarity_image
@@ -264,8 +282,7 @@ def buy(order):
     # if there is no nft to buy, get more options
     if best_nft is None:
         collect_nft_data()  # get nfts syncronously
-        buy(order)
-        return
+        return buy(order, recursion_level=recursion_level)
 
     # delete nft
     db.session.delete(best_nft)
@@ -274,12 +291,14 @@ def buy(order):
     # vefify that there is a nft to buy and there are enough funds
     currency, value = getbestlisting(best_nft.collection_id, best_nft.nft_id)
     if (currency == "Error" or value == 0) or value > funds:
-        buy(order) # if not recursivly call buy function again
-        return
+        return buy(order, recursion_level=recursion_level) # if not recursivly call buy function again
+        
 
     # TODO: submit order
 
     # TODO: send them a email or something
+
+    return "success"
 
 
 
