@@ -206,11 +206,15 @@ def check_orders():
         
         nfts = db.session.query(NFTS).count()
         # call buy function
-        buy(i, nfts+1)
+        value = buy(i, nfts+1)
+
+        if value == "Store Empty":
+            db.session.add(i) # add back to database if store is empty for later processing
+            continue
 
         # add back if there are funds left
-        if i.funds > i.price_cap:
-            i.funds -= i.price_cap
+        if i.funds - value > 0:
+            i.funds -= value
             i.time = now + timedelta(days=i.time_interval) # new time for next buy
             db.session.add(i)
     db.session.commit()
@@ -291,6 +295,7 @@ def buy(order, max_depth, recursion_level=0):
 
     # vefify that there is a nft to buy and there are enough funds
     currency, value = getbestlisting(best_nft.collection_id, best_nft.nft_id)
+
     if (currency == "Error" or value == 0) or value > funds:
         return buy(order, max_depth, recursion_level=recursion_level) # if not recursivly call buy function again
         
@@ -299,7 +304,7 @@ def buy(order, max_depth, recursion_level=0):
 
     # TODO: send them a email or something
 
-    return "success"
+    return value
 
 
 
