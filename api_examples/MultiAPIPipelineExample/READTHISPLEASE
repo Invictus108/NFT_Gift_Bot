@@ -1,0 +1,52 @@
+# Step 1 #
+Gecko API "floor_price_native_asc"
+>List of (1-250) Collections with ASCENDING FLOOR PRICE (guarantee they're really low)
+- "contract_address" -> used to search between different APIs
+- "asset_platform_id" -> returns blockchain (ex: "ethereum")
+# Step 2 #
+Save said collection data to a .json file; update it whenever it is run.
+I DON'T KNOW HOW TO DO THIS THOUGH AND IDK IF IT'S BEST
+Gecko has convenient endpoints but has a limit of 10,000 uses per month.
+# Step 3 #
+Filter through the "asset_platform_id" of the saved json file for the chains we care about (ethereum, solana?)
+
+Alchemy API "getFloorPrice"
+>Takes "contract_address", gives multiple lists, each named after the different market places the collection exists in.
+>Each list contains...
+- "floorPrice"
+- "priceCurrency" -> currency (ex: "ETH")
+- "collectionUrl" -> for OpenSeas collections, the last bit after the / contains the "collection_slug"
+
+Save it to a .json file maybe
+# Step 4 #
+Sort data by floor price (only do this on collections with floorPrice < givenPriceLimit)
+
+Depending on Marketplace ... get NFTs
+
+OpenSeas API "GetAllListingsByCollection"
+>Takes "collection_slug", gives listings
+>Each listing contains...
+- "price" > "current"
+    >In "current"
+    - "currency"
+    - "decimals"
+    - "value"
+    >Calculate price which is value / (10^decimals)
+- "protocol_data" > "parameters" > "offer"
+    >In "offer"
+    - "token"
+    - "identifierOrCriteria"
+
+Make a list of pairs of calculated price, "token", and "identifierOrCriteria"
+
+# Step 5 #
+Get NFT metadata (for agentic stuff)
+
+OpenSeas API "GetNFT"
+>Takes "chain" as the chain you started with, "token" as "address" and "identifierOrCriteria" as "identifier"
+- "name"
+- "description"
+- "image_url"
+- "is_nsfw"
+- "traits" -> list of traits (often empty)
+
