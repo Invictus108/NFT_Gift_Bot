@@ -13,6 +13,7 @@ def getCollectionsAscPriceFloor(num=250, blockchain="ethereum"):
     url = "https://api.coingecko.com/api/v3/nfts/list"
     headers = {"x-cg-demo-api-key": f"{CGECKO_KEY}",
                "per_page": f"{num}"}
+    
     querystring = {"order": "floor_price_native_asc"}
 
     response = requests.get(url, headers=headers, params=querystring).json()
@@ -25,14 +26,17 @@ def getMarketplaceCollectionAddress(contract_address, marketplace="openSea"):
 
     response = requests.get(url, params=querystring).json()
 
-    if marketplace in response:
-        if marketplace == "openSea":
-            collect_url = response[marketplace].get("collectionUrl")
-            return collect_url.rstrip("/").split("/")[-1]
+    try:
+        if marketplace in response:
+            if marketplace == "openSea":
+                collect_url = response[marketplace].get("collectionUrl")
+                return collect_url.rstrip("/").split("/")[-1]
+            else:
+                return response[marketplace].get("collectionUrl")
         else:
-            return response[marketplace].get("collectionUrl")
-    else:
-        return []  # empty list if marketplace key not found
+            return []  # empty list if marketplace key not found
+    except:
+        print("Error: ",response)
 
 def getAllListings(collection_slug, price_celing):
     url = f"https://api.opensea.io/api/v2/listings/collection/{collection_slug}/all"
@@ -84,11 +88,14 @@ def getNFT(address, identifier):
     response = requests.get(url, headers=headers).json()
 
     nft = response.get("nft", {})
+
     results = {
-        "name": nft.get("name"),
+        "collection_id": nft.get("collection", {}),
+        "nft_id": nft.get("identifier"),
         "description": nft.get("description"),
         "image_url": nft.get("image_url")
     }
+
     return results
 
 def getNftWithPriceCeling(price_celing):
@@ -101,8 +108,10 @@ def getNftWithPriceCeling(price_celing):
         listings.extend(getAllListings(l, price_celing))
     nfts = []
     for ls in listings:
-        nfts.append(getNFT(ls.get("token"), ls.get("identifierOrCriteria")).update({"currency":ls.get("currency"),"price":ls.get("price")}))
+        nft = getNFT(ls.get("token"), ls.get("identifierOrCriteria"))
+        nft.update({"currency":ls.get("currency"),"price":ls.get("price")})
+        nfts.append(nft)
     return nfts
 
 if __name__ == '__main__':
-    print(getNftWithPriceCeling(999)) # takes so long I have no idea if it works
+    print(getNftWithPriceCeling(10)) # takes so long I have no idea if it works

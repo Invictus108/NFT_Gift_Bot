@@ -192,19 +192,12 @@ function collectFormData() {
 // Submit form data to backend (placeholder function)
 async function submitFormData(data) {
     // Replace this URL with your actual backend endpoint
-    const API_ENDPOINT = '/api/submit-gift-box';
+    const API_ENDPOINT = 'http://localhost:5000/api/form';
 
     // For demonstration, we'll just log the data and simulate a delay
     console.log('Form Data to Submit:', data);
 
-    // Simulate API call
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve({ success: true });
-        }, 2000);
-    });
-
-    /* Actual implementation:
+    // send data to backend
     const response = await fetch(API_ENDPOINT, {
         method: 'POST',
         headers: {
@@ -218,7 +211,7 @@ async function submitFormData(data) {
     }
 
     return await response.json();
-    */
+    
 }
 
 // Show success message
