@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NFT Gift Box - Curated Digital Assets</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+      <div class="sphere sphere-1"></div>
+      <div class="sphere sphere-2"></div>
+      <div class="sphere sphere-3"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="logo">
+          <span class="logo-icon">🎁</span>
+          <span class="logo-text">NFT GIFT BOX</span>
+        </div>
+        <div class="nav-links">
+          <a href="#home">Home</a>
+          <a href="#how-it-works">How It Works</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#contact">Contact</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+      <div class="container">
+        <div class="hero-content">
+          <h1 class="hero-title">
+            <span class="gradient-text">PERSONALIZED NFT</span>
+            <br />
+            GIFT EXPERIENCE
+          </h1>
+          <p class="hero-subtitle">
+            AI-powered curation delivers the perfect digital assets tailored to
+            your unique preferences.
+            <br /><strong>Made by Jaden, Victor, Kellen, Jack, Jaewon.</strong>
+          </p>
+          <div class="hero-stats">
+            <div class="stat">
+              <div class="stat-number">Expected10K+</div>
+              <div class="stat-label">NFTs Curated</div>
+            </div>
+            <div class="stat">
+              <div class="stat-number">Expected 500+</div>
+              <div class="stat-label">Happy Collectors</div>
+            </div>
+            <div class="stat">
+              <div class="stat-number">Expected 95%</div>
+              <div class="stat-label">Satisfaction Rate</div>
+            </div>
+          </div>
+          <a href="#gift-form" class="cta-button">
+            Start Your Journey
+            <span class="arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works">
+      <div class="container">
+        <h2 class="section-title">How It Works</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">01</div>
+            <div class="step-icon">📝</div>
+            <h3>Share Your Preferences</h3>
+            <p>
+              Tell us about your taste in art, preferred styles, themes, and
+              budget
+            </p>
+          </div>
+          <div class="step">
+            <div class="step-number">02</div>
+            <div class="step-icon">🤖</div>
+            <h3>AI Curation</h3>
+            <p>
+              Our advanced AI analyzes thousands of NFTs to find perfect matches
+            </p>
+          </div>
+          <div class="step">
+            <div class="step-number">03</div>
+            <div class="step-icon">💎</div>
+            <h3>Receive Your Gift</h3>
+            <p>
+              Curated NFTs delivered directly to your wallet at the perfect time
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gift Form Section -->
+    <section class="gift-form-section" id="gift-form">
+      <div class="container">
+        <div class="form-wrapper">
+          <div class="form-header">
+            <h2 class="form-title">Create Your NFT Gift Box</h2>
+            <p class="form-subtitle">
+              Fill out the form below and let our AI curator find the perfect
+              digital assets for you
+            </p>
+          </div>
+
+          <form id="nftGiftForm" class="gift-form">
+            <!-- Personal Information -->
+            <div class="form-section">
+              <h3 class="section-heading">
+                <span class="section-icon">👤</span>
+                Personal Information
+              </h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="fullName">Full Name</label>
+                  <input
+                    type="text"
+                    id="fullName"
+                    name="fullName"
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="email">Email Address</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="john@example.com"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Wallet Information -->
+            <div class="form-section">
+              <h3 class="section-heading">
+                <span class="section-icon">💼</span>
+                Wallet Details
+              </h3>
+              <div class="form-group">
+                <label for="walletAddress">Wallet Address</label>
+                <input
+                  type="text"
+                  id="walletAddress"
+                  name="walletAddress"
+                  placeholder="0x..."
+                  required
+                />
+                <span class="input-hint"
+                  >We'll send your curated NFTs to this address</span
+                >
+              </div>
+            </div>
+
+            <!-- Budget & Preferences -->
+            <div class="form-section">
+              <h3 class="section-heading">
+                <span class="section-icon">💰</span>
+                Budget & Timing
+              </h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="budget">Total Budget (ETH)</label>
+                  <input
+                    type="number"
+                    id="budget"
+                    name="budget"
+                    placeholder="0.5"
+                    step="0.01"
+                    min="0.01"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="priceCap">Max Price per NFT (ETH)</label>
+                  <input
+                    type="number"
+                    id="priceCap"
+                    name="priceCap"
+                    placeholder="0.2"
+                    step="0.01"
+                    min="0.01"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="frequency">Delivery Frequency</label>
+                  <select id="frequency" name="frequency" required>
+                    <option value="">Select frequency</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="biweekly">Bi-weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="duration">Subscription Duration</label>
+                  <select id="duration" name="duration" required>
+                    <option value="">Select duration</option>
+                    <option value="1">1 Month</option>
+                    <option value="3">3 Months</option>
+                    <option value="6">6 Months</option>
+                    <option value="12">12 Months</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Preferences -->
+            <div class="form-section">
+              <h3 class="section-heading">
+                <span class="section-icon">🎨</span>
+                Art Preferences
+              </h3>
+
+              <div class="form-group">
+                <label>Art Styles (Select all that apply)</label>
+                <div class="checkbox-grid">
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="styles" value="abstract" />
+                    <span>Abstract</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="styles" value="pixel" />
+                    <span>Pixel Art</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="styles" value="3d" />
+                    <span>3D Art</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="styles" value="photography" />
+                    <span>Photography</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="styles" value="generative" />
+                    <span>Generative</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="styles" value="anime" />
+                    <span>Anime</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="styles" value="surreal" />
+                    <span>Surreal</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="styles" value="minimalist" />
+                    <span>Minimalist</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Preferred Themes</label>
+                <div class="checkbox-grid">
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="themes" value="nature" />
+                    <span>Nature</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="themes" value="scifi" />
+                    <span>Sci-Fi</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="themes" value="fantasy" />
+                    <span>Fantasy</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="themes" value="urban" />
+                    <span>Urban</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="themes" value="space" />
+                    <span>Space</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="themes" value="animals" />
+                    <span>Animals</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="themes" value="characters" />
+                    <span>Characters</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="themes" value="landscapes" />
+                    <span>Landscapes</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="preferences">Additional Preferences</label>
+                <textarea
+                  id="preferences"
+                  name="preferences"
+                  rows="4"
+                  placeholder="Tell us more about your taste... What artists do you admire? What emotions do you want your NFTs to evoke? Any specific collections you're interested in?"
+                ></textarea>
+                <span class="input-hint"
+                  >Be as detailed as possible - our AI learns from your
+                  input!</span
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="favoriteArtists"
+                  >Favorite Artists or Collections</label
+                >
+                <input
+                  type="text"
+                  id="favoriteArtists"
+                  name="favoriteArtists"
+                  placeholder="e.g., Beeple, XCOPY, Art Blocks"
+                />
+              </div>
+            </div>
+
+            <!-- Investment Goals -->
+            <div class="form-section">
+              <h3 class="section-heading">
+                <span class="section-icon">📈</span>
+                Investment Goals
+              </h3>
+              <div class="form-group">
+                <label>Primary Goal</label>
+                <div class="radio-group">
+                  <label class="radio-item">
+                    <input
+                      type="radio"
+                      name="goal"
+                      value="collection"
+                      required
+                    />
+                    <span>Building a Collection</span>
+                  </label>
+                  <label class="radio-item">
+                    <input
+                      type="radio"
+                      name="goal"
+                      value="investment"
+                      required
+                    />
+                    <span>Investment Growth</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="goal" value="both" required />
+                    <span>Both</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Risk Tolerance</label>
+                <div class="radio-group">
+                  <label class="radio-item">
+                    <input
+                      type="radio"
+                      name="risk"
+                      value="conservative"
+                      required
+                    />
+                    <span>Conservative (Established Artists)</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="risk" value="moderate" required />
+                    <span>Moderate (Mix of Known & Emerging)</span>
+                  </label>
+                  <label class="radio-item">
+                    <input
+                      type="radio"
+                      name="risk"
+                      value="aggressive"
+                      required
+                    />
+                    <span>Aggressive (New & Emerging Artists)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Special Instructions -->
+            <div class="form-section">
+              <h3 class="section-heading">
+                <span class="section-icon">✨</span>
+                Special Instructions
+              </h3>
+              <div class="form-group">
+                <label for="specialInstructions"
+                  >Anything else we should know?</label
+                >
+                <textarea
+                  id="specialInstructions"
+                  name="specialInstructions"
+                  rows="3"
+                  placeholder="Any specific requirements, exclusions, or special requests?"
+                ></textarea>
+              </div>
+            </div>
+
+            <!-- Terms and Submit -->
+            <div class="form-section">
+              <div class="form-group">
+                <label class="checkbox-item terms-checkbox">
+                  <input type="checkbox" id="terms" name="terms" required />
+                  <span
+                    >I agree to the Terms of Service and Privacy Policy</span
+                  >
+                </label>
+              </div>
+
+              <button type="submit" class="submit-button">
+                <span class="button-text">Launch My NFT Gift Box</span>
+                <span class="button-icon">🚀</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+      <div class="container">
+        <h2 class="section-title">Why Choose NFT Gift Box?</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🧠</div>
+            <h3>AI-Powered Curation</h3>
+            <p>
+              Advanced algorithms analyze your preferences and market trends to
+              find the perfect NFTs
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>Secure & Trusted</h3>
+            <p>
+              Bank-level security and transparent transactions ensure your
+              assets are safe
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Market Intelligence</h3>
+            <p>
+              Leverage price prediction and trend analysis to maximize your
+              investment
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3>Personalized Experience</h3>
+            <p>Every selection is tailored to your unique taste and goals</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <div class="logo">
+              <span class="logo-icon">🎁</span>
+              <span class="logo-text">NFT GIFT BOX</span>
+            </div>
+            <p>Curated digital assets powered by AI</p>
+          </div>
+          <div class="footer-section">
+            <h4>Quick Links</h4>
+            <a href="#home">Home</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#gift-form">Get Started</a>
+          </div>
+          <div class="footer-section">
+            <h4>Support</h4>
+            <a href="#contact">Contact Us</a>
+            <a href="#faq">FAQ</a>
+            <a href="#terms">Terms of Service</a>
+          </div>
+          <div class="footer-section">
+            <h4>Connect</h4>
+            <a href="#">Twitter</a>
+            <a href="#">Discord</a>
+            <a href="#">Instagram</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2024 NFT Gift Box. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+  </body>
+</html>
