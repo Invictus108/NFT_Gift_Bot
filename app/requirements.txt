@@ -1,0 +1,10 @@
+flask
+flask-cors
+flask-sqlalchemy
+python-dotenv
+numpy
+nomic
+torch
+transformers
+pillow
+requests

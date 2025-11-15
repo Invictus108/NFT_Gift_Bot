@@ -87,3 +87,6 @@ def getcollections(num=100, order_by="seven_day_volume", chain="ethereum"):
 # extract collection ids
 def getslugsfromcollections(collections):
     return [collection['collection'] for collection in collections]
+
+
+
