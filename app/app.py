@@ -16,6 +16,7 @@ from io import BytesIO
 from bs4 import BeautifulSoup
 from openseas_api import getnftsfromcollection, getcollections, getslugsfromcollections, getbestlisting
 from multipipline_api import getNftWithPriceCeling
+from buy_transfer import buy_nft
 
 # load model for image embeddings
 vision_processor = AutoImageProcessor.from_pretrained("nomic-ai/nomic-embed-vision-v1.5")
@@ -455,7 +456,7 @@ def buy(order, max_depth, recursion_level=0):
         
     print(f"Buying {best_nft.collection_id} {best_nft.nft_id} for {value} {currency}")
 
-    # TODO: submit order
+    #buy_nft(nft.collection_id, nft.nft_id, buyer_public, buyer_private_key, i.wallet)
 
     # TODO: send them a email or something
 
