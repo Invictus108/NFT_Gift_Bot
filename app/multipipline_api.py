@@ -89,6 +89,31 @@ def getNFT(address, identifier):
 
     nft = response.get("nft", {})
 
+    # TODO: figure out what id data is needed to get a individual nft listing and make a funtion to do so
+    # it should return accoding to the belwo form
+    # maybe find a way to use that funtion? it would be easiest 
+    '''
+    def getbestlisting(collection_slug, nft):
+    url = f"https://api.opensea.io/api/v2/listings/collection/{collection_slug}/nfts/{nft}/best"
+
+    order_json = requests.get(url, headers=headers).json()
+
+    
+    # TODO: this is jank
+    try:
+        price_info = order_json["price"]["current"]
+        currency = price_info.get("currency")
+        decimals = price_info.get("decimals", 0)
+        value_str = price_info.get("value", "0")
+
+        # convert value_str to a decimal number accounting for decimals
+        value = int(value_str) / (10 ** decimals)
+
+
+        return currency, value
+    except:
+        return "Error", 0
+    '''
     results = {
         "collection_id": nft.get("collection", {}),
         "nft_id": nft.get("identifier"),
