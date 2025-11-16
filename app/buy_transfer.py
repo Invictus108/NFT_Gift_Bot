@@ -91,7 +91,7 @@ def buy_nft(slug, token_id, buyer_public, buyer_private_key, recipient_public):
 
     # Sign + send buy tx
     signed_tx = w3.eth.account.sign_transaction(tx, private_key=buyer_private_key)
-    buy_tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    buy_tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
     print("Buy TX Hash:", buy_tx_hash.hex())
 
     # ---------- 4. Wait for the NFT to arrive ----------
@@ -114,7 +114,7 @@ def buy_nft(slug, token_id, buyer_public, buyer_private_key, recipient_public):
     })
 
     signed_transfer_tx = w3.eth.account.sign_transaction(transfer_tx, private_key=buyer_private_key)
-    transfer_tx_hash = w3.eth.send_raw_transaction(signed_transfer_tx.rawTransaction)
+    transfer_tx_hash = w3.eth.send_raw_transaction(signed_transfer_tx.raw_transaction)
 
     print("Transfer TX Hash:", transfer_tx_hash.hex())
 
