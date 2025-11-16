@@ -123,6 +123,22 @@ def getNFT(address, identifier):
 
     return results
 
+def getBestListingNFT(collection_slug, identifier):
+
+    url = f"https://api.opensea.io/api/v2/listings/collection/{collection_slug}/nfts/{identifier}/best"
+    headers = {"accept": "*/*", "x-api-key": f"{OPNSEA_KEY}"}
+    response = requests.get(url, headers=headers).json() # THIS SHOULD BE THE "BEST LISTING"
+
+    # --- Extract from price.current ---
+    price_info = response.get("price", {}).get("current", {})
+    currency = price_info.get("currency")
+    decimals = int(price_info.get("decimals"))
+    value = float(price_info.get("value"))
+    price = value / (10 ** decimals)
+
+    return {"currency": currency, "price": price, "identifierOrCriteria": identifier} # Simpliifed to the 4 things that kinda matte
+
+
 def getNftWithPriceCeling(price_celing):
     ascCollect = getCollectionsAscPriceFloor()
     collectSlugs = []
@@ -136,7 +152,7 @@ def getNftWithPriceCeling(price_celing):
         nft = getNFT(ls.get("token"), ls.get("identifierOrCriteria"))
         nft.update({"currency":ls.get("currency"),"price":ls.get("price")})
         nfts.append(nft)
-    return nfts
+    return listings
 
 if __name__ == '__main__':
     print(getNftWithPriceCeling(10)) # takes so long I have no idea if it works
