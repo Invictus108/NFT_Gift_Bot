@@ -2,7 +2,7 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, DateTime, ARRAY
+from sqlalchemy import Column, Integer, String, Float, DateTime, ARRAY, Text
 import os
 from dotenv import load_dotenv
 
@@ -49,10 +49,11 @@ class NFTS(Base):
     __tablename__ = "nfts"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    collection_id = Column(String(120), nullable=False)
-    nft_id = Column(String(120), nullable=False)
+    collection_id = Column(Text, nullable=False)
+    nft_id = Column(Text, nullable=False)
+    image_url = Column(Text, nullable=False)
     price = Column(Float, nullable=False)
-    currency = Column(String(120), nullable=False)
+    currency = Column(Text, nullable=False)
     image_embedding_vector = Column(ARRAY(Float))
     text_embedding_vector = Column(ARRAY(Float))
 

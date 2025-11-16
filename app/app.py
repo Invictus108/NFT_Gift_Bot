@@ -14,8 +14,7 @@ import threading
 import requests
 from io import BytesIO
 from bs4 import BeautifulSoup
-from openseas_api import getnftsfromcollection, getcollections, getslugsfromcollections, getbestlisting
-from multipipline_api import getNftWithPriceCeling
+from multipipline_api import getNftWithPriceCeling, getBestListingNFT, getNFT
 from buy_transfer import buy_nft
 
 # load model for image embeddings
@@ -174,12 +173,13 @@ def update_database(data):
     for nft in nfts:
         duplicate_map[(nft.collection_id, nft.nft_id)] = nft
         db.session.delete(nft)
-    
-
     db.session.commit()
 
+    added = set()
     # add new values (json) into database
     for nft in data:
+        print(nft)
+        print(" ")
         collection_id = nft.get("collection_id")
         # check if its a string
         if not isinstance(collection_id, str):
@@ -187,6 +187,13 @@ def update_database(data):
             continue
 
         nft_id = nft.get("nft_id")
+        image_url = nft.get("image_url")
+
+        # make sure there are no duplicates
+        if (collection_id, nft_id) in added:
+            continue
+        else:
+            added.add((collection_id, nft_id))
 
         if (collection_id, nft_id) in duplicate_map:
             db.session.add(duplicate_map[(collection_id, nft_id)])
@@ -194,24 +201,35 @@ def update_database(data):
             image_url = nft.get("image_url", "")
             description = nft.get("description", "")
 
+            # filter out duplicates and empty vectors
+            if image_url:
+                vector = embed_image_local(image_url).numpy().astype(float).tolist()
+                if str(vector) in added:
+                    print("vector already added")
+                    continue
+                else:
+                    added.add(str(vector))
+            else:
+                continue
+
             new_nft = NFTS(
                 collection_id = collection_id,
                 nft_id = str(nft_id),
+                image_url = image_url,
                 price = nft.get("price"),
                 currency = nft.get("currency"),
 
                 image_embedding_vector = (
-                    None if not image_url 
-                    else embed_image_local(image_url).numpy().astype(float).tolist()
+                    vector
                 ),
 
                 text_embedding_vector = (
-                    None if not description 
-                    else embed_text_chunk_local(description).astype(float).tolist()
+                    None # honestly the data in the description filed is useless
+          
                 ),
             )
 
-        db.session.add(new_nft)
+            db.session.add(new_nft)
 
 
     db.session.commit()
@@ -265,16 +283,22 @@ class Orders(db.Model):
 class NFTS(db.Model):
     __tablename__ = "nfts"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    collection_id = db.Column(db.String(120), nullable=False)
-    nft_id = db.Column(db.String(120), nullable=False)
+    collection_id = db.Column(db.Text, nullable=False)
+    nft_id = db.Column(db.Text, nullable=False)
+    image_url = db.Column(db.Text, nullable=False)
     price = db.Column(db.Float, nullable=False)
-    currency = db.Column(db.String(120), nullable=False)
+    currency = db.Column(db.Text, nullable=False)
     image_embedding_vector = db.Column(db.ARRAY(db.Float)) 
     text_embedding_vector = db.Column(db.ARRAY(db.Float))
 
     def __repr__(self):
-        return f"NFT({self.id}, {self.collection_id}, {self.nft_id}, {len(self.image_embedding_vector)}, {len(self.text_embedding_vector)})"
+        img_len = len(self.image_embedding_vector) if self.image_embedding_vector else 0
+        txt_len = len(self.text_embedding_vector) if self.text_embedding_vector else 0
 
+        return (
+            f"NFT(id={self.id}, collection={self.collection_id}, nft_id={self.nft_id}, "
+            f"image_len={img_len}, text_len={txt_len})"
+        )
 
 # create table (does nothing if already there)
 with app.app_context():
@@ -335,7 +359,9 @@ def check_orders():
     now = datetime.now(timezone.utc)
 
     # find all orders that need to be fulfilled 
-    orders = Orders.query.filter(Orders.time < now).all()
+    #orders = Orders.query.filter(Orders.time < now).all()
+    # get all orders for testing
+    orders = Orders.query.all()
 
     print("got order")
 
@@ -385,7 +411,7 @@ def buy(order, max_depth, recursion_level=0):
     print(f"got nfts of len: {len(nfts)}")
 
     # if there is no data, call the collect data funtion synchronously
-    if len(nfts) == 0:
+    if len(nfts) < 10:
         if not cache_lock:
             print("empty database... collecting data")
             collect_nft_data()
@@ -393,10 +419,10 @@ def buy(order, max_depth, recursion_level=0):
             return "Store Empty"
 
     # make sure there are more than cache size
-    if len(nfts) < nft_cache_size and not cache_lock:
-        print("below cache size... collecting data")
-        cache_lock = True
-        fill_nft_cache() # call collect_nft_data on separate thread
+    # if len(nfts) < nft_cache_size and not cache_lock:
+    #     print("below cache size... collecting data")
+    #     cache_lock = True
+    #     fill_nft_cache() # call collect_nft_data on separate thread
 
     # iterate and find the closes to data
     max_similarity = 0
@@ -447,7 +473,7 @@ def buy(order, max_depth, recursion_level=0):
     db.session.commit()
 
     # vefify that there is a nft to buy and there are enough funds
-    currency, value = getbestlisting(best_nft.collection_id, best_nft.nft_id)
+    currency, value = getBestListingNFT(best_nft.collection_id, int(best_nft.nft_id))
     print(f"currency: {currency}, value: {value}")
 
     if (currency == "Error" or value == 0) or value > funds:
@@ -455,6 +481,10 @@ def buy(order, max_depth, recursion_level=0):
         return buy(order, db.session.query(NFTS).count(), recursion_level=recursion_level) # if not recursivly call buy function again
         
     print(f"Buying {best_nft.collection_id} {best_nft.nft_id} for {value} {currency}")
+    print("max similarity: ", max_similarity)
+    print("image_url ", best_nft.image_url)
+    data = getNFT(best_nft.collection_id, int(best_nft.nft_id))
+    print(data.get("image_url"))
 
     #buy_nft(nft.collection_id, nft.nft_id, buyer_public, buyer_private_key, i.wallet)
 

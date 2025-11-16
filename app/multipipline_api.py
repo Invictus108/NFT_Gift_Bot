@@ -129,14 +129,17 @@ def getBestListingNFT(collection_slug, identifier):
     headers = {"accept": "*/*", "x-api-key": f"{OPNSEA_KEY}"}
     response = requests.get(url, headers=headers).json() # THIS SHOULD BE THE "BEST LISTING"
 
-    # --- Extract from price.current ---
-    price_info = response.get("price", {}).get("current", {})
-    currency = price_info.get("currency")
-    decimals = int(price_info.get("decimals"))
-    value = float(price_info.get("value"))
-    price = value / (10 ** decimals)
-
-    return {"currency": currency, "price": price, "identifierOrCriteria": identifier} # Simpliifed to the 4 things that kinda matte
+    try:
+        # --- Extract from price.current ---
+        price_info = response.get("price", {}).get("current", {})
+        currency = price_info.get("currency")
+        decimals = int(price_info.get("decimals"))
+        value = float(price_info.get("value"))
+        price = value / (10 ** decimals)
+        return currency, price
+    except:
+        return "Error", 0
+    
 
 
 def getNftWithPriceCeling(price_celing):
@@ -152,7 +155,8 @@ def getNftWithPriceCeling(price_celing):
         nft = getNFT(ls.get("token"), ls.get("identifierOrCriteria"))
         nft.update({"currency":ls.get("currency"),"price":ls.get("price")})
         nfts.append(nft)
-    return listings
+    return nfts
 
 if __name__ == '__main__':
-    print(getNftWithPriceCeling(10)) # takes so long I have no idea if it works
+    print(getNFT("mint-genesis-nft", 28744))
+    #print(getNftWithPriceCeling(10)) # takes so long I have no idea if it works
