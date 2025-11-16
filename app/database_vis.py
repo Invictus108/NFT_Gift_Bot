@@ -73,7 +73,7 @@ class NFTS(Base):
 
 def list_all_orders():
     print("\nFetching all orders...\n")
-    orders = session.query(NFTS).all()
+    orders = session.query(Orders).all()
 
     if not orders:
         print("No orders found.")

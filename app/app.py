@@ -359,9 +359,9 @@ def check_orders():
     now = datetime.now(timezone.utc)
 
     # find all orders that need to be fulfilled 
-    #orders = Orders.query.filter(Orders.time < now).all()
+    orders = Orders.query.filter(Orders.time < now).all()
     # get all orders for testing
-    orders = Orders.query.all()
+    #orders = Orders.query.all()
 
     print("got order")
 
