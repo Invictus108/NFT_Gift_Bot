@@ -248,6 +248,10 @@ def fill_nft_cache():
 
 # setup app
 app = Flask(__name__)
+
+# TODO: update when hosted
+#CORS(app, resources={r"/*": {"origins": "https://jadencohen.com"}})
+
 CORS(app)
 
 # load environment variables
