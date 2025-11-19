@@ -4,7 +4,11 @@ app.py
 Flask backend for "open lootbox" flow.
 
 When a user opens a lootbox:
-  - POST /api/open-lootbox with JSON: { "walletAddress": "..." }
+  - POST /api/open-lootbox with JSON:
+      {
+        "walletAddress": "...",
+        "imageUrl": "https://..."   # OPTIONAL: image to use for NFT(s)
+      }
   - Backend:
       1) looks up user by wallet (email + name),
       2) generates prizes (NFT metadata),
@@ -27,7 +31,7 @@ Environment variables:
 
 import os
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from flask import Flask, request, jsonify
 from sendgrid import SendGridAPIClient
@@ -48,7 +52,7 @@ except ImportError:
 
 SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
 SENDGRID_TEMPLATE_ID = os.environ.get("SENDGRID_TEMPLATE_ID")
-SENDGRID_FROM_EMAIL = os.environ.get("SENDGRID_FROM_EMAIL", "rewards@yourproject.xyz") #shld input actual email from sendgrid
+SENDGRID_FROM_EMAIL = os.environ.get("SENDGRID_FROM_EMAIL", "rewards@yourproject.xyz")  # TODO: set to verified sender
 
 COLLECTION_NAME = os.environ.get("COLLECTION_NAME", "LootBox Season 1")
 MARKETPLACE_NAME = os.environ.get("MARKETPLACE_NAME", "Magic Eden")
@@ -78,29 +82,41 @@ def shorten_wallet_address(wallet_address: str) -> str:
     return f"{wallet_address[:6]}…{wallet_address[-4:]}"
 
 
-def generate_prizes_for_user(wallet_address: str) -> List[Dict[str, Any]]:
+def generate_prizes_for_user(
+    wallet_address: str,
+    nft_image_url_input: Optional[str] = None,
+) -> List[Dict[str, Any]]:
     """
     Simulated function to generate prizes for a given wallet.
+
+    Args:
+        wallet_address: wallet that opened the lootbox
+        nft_image_url_input: if provided, this URL will be used
+                             as the image for all NFTs in this stub.
+
     In real code, this would:
       - use your rarity logic
       - talk to your on-chain minting logic
       - return final tokenIds + metadata
     """
+    # If the caller provided an image URL, use it; otherwise fall back to defaults
+    img1 = nft_image_url_input or "https://cdn.yoursite.com/nfts/dragon-42.png"
+    img2 = nft_image_url_input or "https://cdn.yoursite.com/nfts/potion-109.png"
+
     # TODO: Replace with real logic / on-chain mint
-    # This is just a stub.
     return [
         {
             "token_id": "123",
             "nft_name": "Mythic Dragon #42",
             "nft_tier": "Mythic",
-            "nft_image_url": "https://cdn.yoursite.com/nfts/dragon-42.png",
+            "nft_image_url": img1,
             "view_on_marketplace_url": "https://magiceden.io/item-details/dragon-42",
         },
         {
             "token_id": "124",
             "nft_name": "Silver Potion #109",
             "nft_tier": "Uncommon",
-            "nft_image_url": "https://cdn.yoursite.com/nfts/potion-109.png",
+            "nft_image_url": img2,
             "view_on_marketplace_url": "https://magiceden.io/item-details/potion-109",
         },
     ]
@@ -156,7 +172,6 @@ def send_prize_email(
         to_emails=to_email,
     )
 
-    # Dynamic template data that your SendGrid template will use
     dynamic_data = {
         "name": name,
         "wallet_address_short": wallet_address_short,
@@ -174,12 +189,12 @@ def send_prize_email(
         sg = SendGridAPIClient(SENDGRID_API_KEY)
         response = sg.send(message)
         logger.info("SendGrid response status: %s", response.status_code)
-    except Exception as e:
+    except Exception:
         logger.exception("Failed to send SendGrid email")
         raise
 
 
-def open_lootbox(wallet_address: str) -> Dict[str, Any]:
+def open_lootbox(wallet_address: str, nft_image_url_input: Optional[str] = None) -> Dict[str, Any]:
     """
     Main function you call when the user clicks "Open lootbox".
 
@@ -197,9 +212,9 @@ def open_lootbox(wallet_address: str) -> Dict[str, Any]:
     email = user.get("email")
     name = user.get("name") or "GM"
 
-    prizes_raw = generate_prizes_for_user(wallet_address)
+    # Generate prizes, optionally using the provided image URL
+    prizes_raw = generate_prizes_for_user(wallet_address, nft_image_url_input=nft_image_url_input)
 
-    # Prepare data for email template (names must match template placeholders)
     wallet_address_short = shorten_wallet_address(wallet_address)
 
     prizes_for_email = [
@@ -223,7 +238,6 @@ def open_lootbox(wallet_address: str) -> Dict[str, Any]:
     )
 
     # TODO (optional): persist to DB with email_sent = True
-    # e.g. insert rows into lootbox_prizes table with an email_batch_id
 
     return {
         "email": email,
@@ -242,7 +256,11 @@ app = Flask(__name__)
 def api_open_lootbox():
     """
     POST /api/open-lootbox
-    Body JSON: { "walletAddress": "..." }
+    Body JSON:
+      {
+        "walletAddress": "0x123...",
+        "imageUrl": "https://..."   # OPTIONAL
+      }
 
     Response:
       {
@@ -266,11 +284,13 @@ def api_open_lootbox():
         return jsonify({"error": "Invalid JSON"}), 400
 
     wallet_address = (data or {}).get("walletAddress")
+    nft_image_url_input = (data or {}).get("imageUrl")  # NEW: optional image URL from client
+
     if not wallet_address:
         return jsonify({"error": "walletAddress is required"}), 400
 
     try:
-        result = open_lootbox(wallet_address)
+        result = open_lootbox(wallet_address, nft_image_url_input=nft_image_url_input)
         return jsonify(
             {
                 "success": True,
@@ -281,7 +301,7 @@ def api_open_lootbox():
     except ValueError as ve:
         logger.warning("User error in open_lootbox: %s", ve)
         return jsonify({"error": str(ve)}), 400
-    except Exception as e:
+    except Exception:
         logger.exception("Error opening lootbox")
         return jsonify({"error": "Failed to open lootbox"}), 500
 
@@ -289,21 +309,3 @@ def api_open_lootbox():
 if __name__ == "__main__":
     # For local dev; in production use gunicorn/uvicorn/etc.
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
-
-
-
-
-""" to run locally:
-export SENDGRID_API_KEY="your_key"
-export SENDGRID_TEMPLATE_ID="your_template_id"
-export SENDGRID_FROM_EMAIL="rewards@yourproject.xyz"
-
-python app.py
-
-Test with:
-curl -X POST http://localhost:5000/api/open-lootbox \
-  -H "Content-Type: application/json" \
-  -d '{"walletAddress": "0x1234567890abcdef1234567890abcdef12345678"}'
-
-"""
-
