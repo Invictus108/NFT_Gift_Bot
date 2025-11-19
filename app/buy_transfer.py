@@ -1,17 +1,12 @@
 import requests
 from web3 import Web3
+import os
+from dotenv import load_dotenv
 
-OPENSEA_API_KEY = "YOUR_OPENSEA_API_KEY"
+load_dotenv()
+
+OPENSEA_API_KEY = OPNSEA_KEY = os.getenv('OPNSEA_APIKEY')
 SEAPORT_ADDRESS = Web3.to_checksum_address("0x00000000000001ad428e4906ae43d8f9852d0dd6")
-
-# Free public RPC (you can swap to Alchemy if you want)
-w3 = Web3(
-    Web3.HTTPProvider(
-        "https://eth-mainnet.g.alchemy.com/v2/YOUR_ALCHEMY_KEY"
-    )
-)
-
-
 
 # Minimal ERC721 ABI for transfer
 ERC721_ABI = [{

@@ -14,6 +14,8 @@ import threading
 import requests
 from io import BytesIO
 from bs4 import BeautifulSoup
+from web3 import Web3
+import time
 from multipipline_api import getNftWithPriceCeling, getBestListingNFT, getNFT
 from buy_transfer import buy_nft
 
@@ -21,6 +23,61 @@ from buy_transfer import buy_nft
 vision_processor = AutoImageProcessor.from_pretrained("nomic-ai/nomic-embed-vision-v1.5")
 vision_model = AutoModel.from_pretrained("nomic-ai/nomic-embed-vision-v1.5", trust_remote_code=True)
 vision_model.eval()
+
+# web3 provide for buy and payment verification
+w3 = Web3(Web3.HTTPProvider(os.getenv('ALCHEM_APIKEY')))
+
+def verify_eth_payment(tx_hash: str, required_recipient: str, required_amount_eth: float, timeout = 180):
+    # Try to fetch the transaction (may not exist immediately on some RPCs)
+    try:
+        tx = w3.eth.get_transaction(tx_hash)
+    except Exception:
+        raise ValueError("Transaction hash not found")
+
+    # Wait for mining
+    start = time.time()
+    receipt = None
+
+    while time.time() - start < timeout:
+        try:
+            receipt = w3.eth.get_transaction_receipt(tx_hash)
+        except:
+            receipt = None
+
+        if receipt is not None:
+            break
+
+        time.sleep(2)  # wait 2 seconds before retrying
+
+
+    # Must be mined
+    receipt = w3.eth.get_transaction_receipt(tx_hash)
+    if receipt is None:
+        raise ValueError("Transaction is not mined yet")
+
+    # Must be successful
+    if receipt.status != 1:
+        raise ValueError("Transaction failed on-chain")
+
+    # Verify recipient
+    if tx["to"].lower() != required_recipient.lower():
+        raise ValueError("Transaction recipient mismatch")
+
+    # Verify amount in ETH
+    value_eth = w3.from_wei(tx["value"], "ether")
+    if float(value_eth) < float(required_amount_eth):
+        raise ValueError("Transaction amount is too low")
+
+    # Optional: verify sender
+    # if tx["from"].lower() != expected_sender.lower():
+    #     raise ValueError("Sender address mismatch")
+
+    return {
+        "from": tx["from"],
+        "to": tx["to"],
+        "amount_eth": float(value_eth),
+        "block": receipt.blockNumber
+    }
 
 # helper funtions
 def interval_to_days(interval: str) -> int:
@@ -260,6 +317,8 @@ load_dotenv()
 # dataase stuff
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL") # port: 5432
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+BOT_WALLET_ADDRESS = os.getenv("BOT_WALLET")
+BOT_PRIVATE_KEY = os.getenv("BOT_PRIVATE_KEY")
 
 # cache stuff
 nft_cache_size = 100
@@ -313,6 +372,12 @@ with app.app_context():
 @app.route('/api/form', methods=['POST'])
 def index():
     data = request.json
+
+    # verify paymant
+    try:
+        verify_eth_payment(data.get("txHash"), BOT_WALLET_ADDRESS, data.get("budget", {}).get("totalBudget"))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
     # Extract fields
     wallet = data.get("walletInfo", {}).get("walletAddress")
@@ -490,7 +555,7 @@ def buy(order, max_depth, recursion_level=0):
     data = getNFT(best_nft.collection_id, int(best_nft.nft_id))
     print(data.get("image_url"))
 
-    #buy_nft(nft.collection_id, nft.nft_id, buyer_public, buyer_private_key, i.wallet)
+    buy_nft(nft.collection_id, nft.nft_id, BOT_WALLET_ADDRESS, BOT_PRIVATE_KEY, order.wallet)
 
     # TODO: send them a email or something
 

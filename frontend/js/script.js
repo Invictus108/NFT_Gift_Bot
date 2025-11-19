@@ -1,3 +1,6 @@
+import { BrowserProvider, parseEther } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.min.js";
+
+
 // ===== SMOOTH SCROLLING =====
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
@@ -135,25 +138,84 @@ form.addEventListener('submit', async function(e) {
     submitButton.innerHTML = '<span class="button-text">Processing...</span> <span class="button-icon">⏳</span>';
     submitButton.disabled = true;
 
+    const ethAmount = Number(formData.budget.totalBudget);
+    const recipient = "0xfe1d04eab4c872ead7d778cf7c22ef09fb23f7c6"; // THIS IS MY WALLET. THIS IS NOT FOR PROD THIS IS TEST
+    const status = document.getElementById('status');
+
+
+    // Payment stuff
+    // GPTed so hope it works
+    if (!window.ethereum) {
+        status.innerText = "MetaMask not detected.";
+        console.error("MetaMask not detected.");
+        return;
+    }
+    if (!ethAmount || Number(ethAmount) <= 0) {
+        status.innerText = "Invalid ETH amount.";
+        console.error("Invalid ETH amount.", ethAmount);
+        return;
+    }
+
+    // covert to string
+    const string_ethAmount = String(ethAmount);
+
     try {
-        // Simulate API call (replace with actual backend endpoint)
-        await submitFormData(formData);
+        console.log("2")
+        // ⭐ Step 1: Trigger MetaMask payment
+        status.innerText = "Waiting for MetaMask…";
 
-        // Show success message
-        showSuccessMessage();
+        const provider = new BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
 
-        // Reset form
-        form.reset();
+        console.log("About to open MetaMask…");
+        const tx = await signer.sendTransaction({
+            to: recipient,
+            value: parseEther(string_ethAmount)
+        });
+
+        status.innerText = "Transaction pending…";
+
+        await tx.wait();  // ⭐ Wait for blockchain confirmation
+
+        status.innerText = "Payment confirmed.";
+
+        // ⭐ Step 2: Now submit form to your backend
+        const fullFormData = Object.fromEntries(new FormData(form));
+
+        // Optionally attach TX hash for backend validation
+        fullFormData.txHash = tx.hash;
+
+        try {
+            // Simulate API call (replace with actual backend endpoint)
+            await submitFormData(fullFormData);
+
+            // Show success message
+            showSuccessMessage();
+
+            // Reset form
+            form.reset();
+
+        } catch (error) {
+            // Show error message
+            alert('An error occurred while submitting your form. Please try again.');
+            console.error('Form submission error:', error);
+        } finally {
+            // Restore button state
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
+        }
 
     } catch (error) {
         // Show error message
         alert('An error occurred while submitting your form. Please try again.');
         console.error('Form submission error:', error);
-    } finally {
         // Restore button state
         submitButton.innerHTML = originalButtonText;
         submitButton.disabled = false;
     }
+
+
+
 });
 
 // Collect all form data
@@ -170,7 +232,6 @@ function collectFormData() {
             totalBudget: parseFloat(document.getElementById('budget').value),
             maxPricePerNFT: parseFloat(document.getElementById('priceCap').value),
             frequency: document.getElementById('frequency').value,
-            duration: parseInt(document.getElementById('duration').value)
         },
         preferences: {
             styles: Array.from(document.querySelectorAll('input[name="styles"]:checked')).map(cb => cb.value),
