@@ -1,0 +1,3 @@
+need to run it in a http server to dodge cors
+
+run: python -m http.server 5500
