@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "rootDirectory": "app",
+  "builds": [
+    {
+      "src": "app/**/*",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app/$1"
+    }
+  ]
+}
