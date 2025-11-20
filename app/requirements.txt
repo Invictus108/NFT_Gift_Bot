@@ -2,9 +2,12 @@ flask
 flask-cors
 flask-sqlalchemy
 python-dotenv
+sendgrid
+requests
 numpy
-nomic
 torch
 transformers
-pillow
-requests
+Pillow
+beautifulsoup4
+web3
+nomic

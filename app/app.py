@@ -18,6 +18,7 @@ from web3 import Web3
 import time
 from multipipline_api import getNftWithPriceCeling, getBestListingNFT, getNFT
 from buy_transfer import buy_nft
+from email_app import send_template_email
 
 # load model for image embeddings
 vision_processor = AutoImageProcessor.from_pretrained("nomic-ai/nomic-embed-vision-v1.5")
@@ -368,6 +369,13 @@ with app.app_context():
     db.create_all()
 
 
+# route for wake pings
+@app.route("/wake")
+def wake():
+    return {"status": "awake"}
+
+
+
 # form route
 @app.route('/api/form', methods=['POST'])
 def index():
@@ -555,9 +563,14 @@ def buy(order, max_depth, recursion_level=0):
     data = getNFT(best_nft.collection_id, int(best_nft.nft_id))
     print(data.get("image_url"))
 
-    buy_nft(nft.collection_id, nft.nft_id, BOT_WALLET_ADDRESS, BOT_PRIVATE_KEY, order.wallet)
 
-    # TODO: send them a email or something
+    try:
+        buy_nft(nft.collection_id, nft.nft_id, BOT_WALLET_ADDRESS, BOT_PRIVATE_KEY, order.wallet)
+    except:
+        print("error buying nft")
+        return buy(order, db.session.query(NFTS).count(), recursion_level=recursion_level)
+
+    send_template_email(order.email, best_nft.image_url)
 
     return value
 
