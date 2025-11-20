@@ -4,11 +4,12 @@ flask-sqlalchemy
 python-dotenv
 sendgrid
 requests
-numpy
-torch
+numpy==1.26.4
+torch==2.5.1
 transformers
 Pillow
 beautifulsoup4
 web3
-nomic
+nomic==3.6.0
 gunicorn==21.2.0
+einops
