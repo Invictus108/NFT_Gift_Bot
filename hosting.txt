@@ -1,0 +1,4 @@
+frontend on firebase
+backend on render free tier
+database at neon
+cron-job.org to keep free render tier up and check orders
