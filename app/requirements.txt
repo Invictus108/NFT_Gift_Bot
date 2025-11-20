@@ -11,3 +11,4 @@ Pillow
 beautifulsoup4
 web3
 nomic
+gunicorn==21.2.0
