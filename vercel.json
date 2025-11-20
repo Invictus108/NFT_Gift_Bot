@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "rootDirectory": "app",
   "builds": [
     {
       "src": "app/**/*",
